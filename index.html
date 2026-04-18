@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="팬트리">
+<meta name="theme-color" content="#f5f0e8">
+<title>팬트리 · 나의 재고장부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23f5f0e8'/%3E%3Ctext x='90' y='115' font-family='Georgia,serif' font-size='90' font-style='italic' text-anchor='middle' fill='%23463f36'%3EP%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --cream-soft: #faf6ef;
+  --cream-warm: #ebe3d5;
+  --ink: #2b2620;
+  --ink-soft: #5a504a;
+  --ink-faint: #8a7f75;
+  --border: #d9cfbf;
+  --border-soft: #e5ddd0;
+  --accent: #8b3a2f;
+  --expiry-warn: #c49a3f;
+  --expiry-danger: #8b3a2f;
+  --shadow: 0 1px 2px rgba(43, 38, 32, 0.04), 0 4px 12px rgba(43, 38, 32, 0.06);
+  --shadow-lift: 0 2px 8px rgba(43, 38, 32, 0.08), 0 12px 32px rgba(43, 38, 32, 0.1);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  font-weight: 400;
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 20% 10%, rgba(196, 154, 63, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 90%, rgba(139, 58, 47, 0.03) 0%, transparent 50%);
+}
+
+header {
+  padding: 24px 20px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky;
+  top: env(safe-area-inset-top);
+  background: var(--cream);
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+header .brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+header .tagline {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 16px 16px 8px;
+}
+
+.stat {
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.stat:active { transform: scale(0.97); }
+
+.stat .num {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.stat.warn .num { color: var(--expiry-warn); }
+.stat.danger .num { color: var(--expiry-danger); }
+
+.stat .label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.controls { padding: 8px 16px 12px; }
+
+.search-box { position: relative; margin-bottom: 12px; }
+
+.search-box input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+
+.search-box input:focus { border-color: var(--ink-faint); }
+
+.search-box::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7f75' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+}
+
+.category-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0;
+}
+
+.category-tabs::-webkit-scrollbar { display: none; }
+
+.cat-tab {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.cat-tab.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+.cat-tab.manage {
+  background: var(--cream-soft);
+  border-style: dashed;
+  color: var(--ink-faint);
+}
+
+.cat-tab .emoji { margin-right: 4px; }
+
+.filter-switch {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 3px;
+  background: var(--cream-warm);
+  border-radius: 100px;
+}
+
+.filter-switch button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  border-radius: 100px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.filter-switch button.active {
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.sort-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 16px 8px;
+}
+
+.sort-row .count-label {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.sort-row .sort-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.items { padding: 4px 16px 24px; }
+
+.item {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px;
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  animation: slideIn 0.3s ease-out backwards;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.item:active { transform: scale(0.99); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.item-accent {
+  width: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.item.exp-warn .item-accent { background: var(--expiry-warn); }
+.item.exp-danger .item-accent { background: var(--expiry-danger); }
+.item.exp-expired { opacity: 0.5; }
+.item.exp-expired .item-accent { background: var(--ink-faint); }
+
+.item-body { flex: 1; min-width: 0; }
+
+.item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.item-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.item-qty {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--cream-warm);
+  border-radius: 100px;
+  padding: 3px;
+}
+
+.qty-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  line-height: 1;
+  padding: 0;
+}
+
+.qty-btn:active { background: var(--border); }
+
+.qty-num {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-size: 15px;
+  min-width: 20px;
+  text-align: center;
+  color: var(--ink);
+}
+
+.item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.item-cat { display: inline-flex; align-items: center; gap: 4px; }
+
+.item-expiry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.item.exp-warn .item-expiry { color: var(--expiry-warn); }
+.item.exp-danger .item-expiry { color: var(--expiry-danger); }
+
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--ink-faint);
+}
+
+.empty .icon {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 64px;
+  color: var(--border);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.empty .title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.empty .hint { font-size: 13px; line-height: 1.5; }
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-soft);
+  padding: 10px 20px calc(10px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: inherit;
+  color: var(--ink-faint);
+}
+
+.nav-btn.primary {
+  background: var(--ink);
+  color: var(--cream);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  box-shadow: var(--shadow-lift);
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.nav-btn.primary:active { transform: scale(0.95); }
+
+.nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+.nav-btn .nav-label { font-size: 10px; letter-spacing: 0.05em; }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 38, 32, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.modal-backdrop.show { opacity: 1; pointer-events: auto; }
+
+.modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  z-index: 201;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -8px 32px rgba(43, 38, 32, 0.15);
+}
+
+.modal.show { transform: translateY(0); }
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 8px;
+}
+
+.modal-header {
+  padding: 12px 20px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.modal-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+.modal-body { padding: 20px; }
+
+.form-group { margin-bottom: 16px; }
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-group input:focus, .form-group select:focus { border-color: var(--ink-faint); }
+
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7f75' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.btn:active { opacity: 0.8; }
+
+.btn-primary { background: var(--ink); color: var(--cream); }
+.btn-secondary { background: var(--cream-warm); color: var(--ink); margin-top: 8px; }
+.btn-danger { background: var(--accent); color: var(--cream-soft); }
+.btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--border); }
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+
+.settings-item:last-child { border-bottom: none; }
+.settings-item .label { font-size: 15px; color: var(--ink); }
+.settings-item .desc { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+.settings-item .arrow { color: var(--ink-faint); font-size: 18px; }
+
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 12px 20px;
+  border-radius: 100px;
+  font-size: 14px;
+  box-shadow: var(--shadow-lift);
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.detail-header { text-align: center; padding: 20px 0; }
+.detail-name { font-family: 'Fraunces', Georgia, serif; font-size: 26px; line-height: 1.2; margin-bottom: 8px; }
+.detail-cat { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+
+.detail-info {
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 14px;
+}
+
+.detail-row:last-child { border-bottom: none; }
+.detail-row .key {
+  color: var(--ink-faint);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+  align-self: center;
+}
+.detail-row .val {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.divider {
+  text-align: center;
+  margin: 24px 0 16px;
+  color: var(--ink-faint);
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.divider::before, .divider::after {
+  content: '—';
+  margin: 0 8px;
+}
+
+.cat-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--cream-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.cat-manage-item .emoji-input {
+  width: 44px;
+  height: 44px;
+  text-align: center;
+  font-size: 22px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--cream);
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.cat-manage-item .name-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  min-width: 0;
+}
+
+.cat-manage-item .del-btn {
+  background: var(--accent);
+  color: var(--cream);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.cat-manage-item .del-btn:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+  color: var(--ink-faint);
+}
+
+.recent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.recent-chip {
+  padding: 6px 10px;
+  background: var(--cream-warm);
+  border: 1px solid var(--border-soft);
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.recent-chip:active { background: var(--border); }
+.recent-chip .chip-cat { margin-right: 3px; opacity: 0.7; }
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--cream-soft);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+
+.emoji-grid button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  aspect-ratio: 1;
+}
+
+.emoji-grid button:active,
+.emoji-grid button.selected {
+  background: var(--cream-warm);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Pantry</div>
+  <div class="tagline">나의 재고장부</div>
+</header>
+
+<div class="summary">
+  <div class="stat" id="stat-total">
+    <div class="num" id="num-total">0</div>
+    <div class="label">Total</div>
+  </div>
+  <div class="stat warn" id="stat-soon">
+    <div class="num" id="num-soon">0</div>
+    <div class="label">Soon</div>
+  </div>
+  <div class="stat danger" id="stat-expired">
+    <div class="num" id="num-expired">0</div>
+    <div class="label">Expired</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="filter-switch">
+    <button class="active" data-filter="all">전체</button>
+    <button data-filter="active">사용중</button>
+    <button data-filter="soon">임박(30일)</button>
+    <button data-filter="expired">만료</button>
+  </div>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="물건 이름으로 찾기..." autocomplete="off">
+  </div>
+  <div class="category-tabs" id="category-tabs"></div>
+</div>
+
+<div class="sort-row">
+  <span class="count-label" id="count-label"></span>
+  <button class="sort-btn" id="sort-btn">유통기한순 ↓</button>
+</div>
+
+<div class="items" id="items"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn" onclick="openExport()">
+    <span class="nav-icon">⇅</span>
+    <span class="nav-label">데이터</span>
+  </button>
+  <button class="nav-btn primary" onclick="openAdd()">＋</button>
+  <button class="nav-btn" onclick="openStats()">
+    <span class="nav-icon">◎</span>
+    <span class="nav-label">통계</span>
+  </button>
+</nav>
+
+<div class="modal-backdrop" id="backdrop" onclick="closeModal()"></div>
+
+<div class="modal" id="modal-add">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-title" id="modal-title">새 물건 추가</div>
+  </div>
+  <div class="modal-body">
+    <div id="recent-section" style="margin-bottom: 16px; display: none;">
+      <label style="display:block; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; font-weight:500;">최근 등록한 물건 · 탭하면 자동 입력</label>
+      <div class="recent-chips" id="recent-chips"></div>
+    </div>
+    
+    <form id="item-form" onsubmit="saveItem(event)">
+      <input type="hidden" id="item-id">
+      <div class="form-group">
+        <label>이름 *</label>
+        <input type="text" id="item-name" required placeholder="예: 토마토 파스타 소스">
+      </div>
+      <div class="form-group">
+        <label>카테고리 *</label>
+        <select id="item-category" required></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>수량 *</label>
+          <input type="number" id="item-qty" value="1" min="1" required>
+        </div>
+        <div class="form-group">
+          <label>단위</label>
+          <input type="text" id="item-unit" placeholder="개, 병, ml...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>유통/사용기한</label>
+        <input type="date" id="item-expiry">
+      </div>
+      <div class="form-group">
+        <label>구매일</label>
+        <input type="date" id="item-purchased">
+      </div>
+      <div class="form-group">
+        <label>메모</label>
+        <input type="text" id="item-note" placeholder="선택사항">
+      </div>
+      <button type="submit" class="btn btn-primary">저장</button>
+      <button type="button" class="btn btn-danger" id="delete-btn" onclick="deleteItem()" style="display:none; margin-top:8px;">삭제</button>
+      <button type="button" class="btn btn-ghost" onclick="closeModal()" style="margin-top:8px;">취소</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="modal-detail">
+  <div class="modal-handle"></div>
+  <div class="modal-body">
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-category">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-title">카테고리 관리</div>
+  </div>
+  <div class="modal-body">
+    <div style="font-size:12px; color:var(--ink-faint); margin-bottom:12px; line-height:1.5;">
+      이모지를 탭하면 아이콘을 바꿀 수 있어요.<br>
+      사용 중인 카테고리는 삭제할 수 없습니다.
+    </div>
+    <div id="cat-manage-list"></div>
+    <button type="button" class="btn btn-secondary" onclick="addNewCategory()">+ 카테고리 추가</button>
+    <div id="emoji-picker-wrap" style="display:none; margin-top:16px;">
+      <label style="display:block; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; font-weight:500;">이모지 선택</label>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="saveCategoriesAndClose()" style="margin-top:16px;">저장</button>
+    <button type="button" class="btn btn-ghost" onclick="cancelCategoryEdit()" style="margin-top:8px;">취소</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-export">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-title">데이터 관리</div>
+  </div>
+  <div class="modal-body">
+    <div class="settings-item" onclick="exportData()">
+      <div>
+        <div class="label">전체 백업 내보내기</div>
+        <div class="desc">JSON 파일로 저장 · 완전 복원용</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="settings-item" onclick="document.getElementById('import-file').click()">
+      <div>
+        <div class="label">백업 가져오기</div>
+        <div class="desc">JSON 파일에서 복원</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <div class="settings-item" onclick="exportCSV()">
+      <div>
+        <div class="label">CSV 내보내기</div>
+        <div class="desc">엑셀에서 열 수 있는 형식</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="divider">초기화</div>
+    <button type="button" class="btn btn-danger" onclick="confirmClear()">모든 데이터 삭제</button>
+    <button type="button" class="btn btn-ghost" onclick="closeModal()" style="margin-top:8px;">닫기</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-stats">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-title">소비 현황</div>
+  </div>
+  <div class="modal-body" id="stats-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'pantry_items_v1';
+const CATEGORY_KEY = 'pantry_categories_v1';
+
+const DEFAULT_CATEGORIES = [
+  { id: 'food', emoji: '🍎', label: '식품' },
+  { id: 'cosmetic', emoji: '🧴', label: '화장품' },
+  { id: 'living', emoji: '🧺', label: '생활용품' },
+  { id: 'medicine', emoji: '💊', label: '의약품' },
+  { id: 'supplement', emoji: '🌿', label: '영양제' },
+  { id: 'other', emoji: '✦', label: '기타' }
+];
+
+const EMOJI_OPTIONS = [
+  '🍎','🍞','🥛','🧀','🍜','🥫','🍯','🍫',
+  '🧴','💄','🧼','🪥','🧽','🧻','🧺','🧷',
+  '💊','🩹','🌡️','🧬','🌿','☕','🍵','🧂',
+  '✦','⭐','🌸','🌱','🐾','🎀','📦','🎁',
+  '🏠','🛁','🛏️','🪑','🪞','🧯','🔦','🕯️',
+  '📚','✏️','📎','🖇️','📌','🔑','🔋','💡'
+];
+
+let state = {
+  items: [],
+  categories: [],
+  activeCategory: 'all',
+  activeFilter: 'all',
+  search: '',
+  sortBy: 'expiry',
+  editingId: null,
+  tempCategories: null,
+  emojiTargetIdx: null
+};
+
+function loadData() {
+  try {
+    const rawItems = localStorage.getItem(STORAGE_KEY);
+    state.items = rawItems ? JSON.parse(rawItems) : [];
+  } catch(e) { state.items = []; }
+  try {
+    const rawCats = localStorage.getItem(CATEGORY_KEY);
+    state.categories = rawCats ? JSON.parse(rawCats) : [...DEFAULT_CATEGORIES];
+  } catch(e) { state.categories = [...DEFAULT_CATEGORIES]; }
+  if (!state.categories || state.categories.length === 0) {
+    state.categories = [...DEFAULT_CATEGORIES];
+  }
+}
+
+function saveItems() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items)); }
+function saveCategories() { localStorage.setItem(CATEGORY_KEY, JSON.stringify(state.categories)); }
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function getCategory(id) {
+  return state.categories.find(c => c.id === id) || { id: id, emoji: '✦', label: id || '기타' };
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  target.setHours(0,0,0,0);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return Math.round((target - today) / 86400000);
+}
+
+function expiryStatus(dateStr) {
+  const d = daysUntil(dateStr);
+  if (d === null) return 'none';
+  if (d < 0) return 'expired';
+  if (d <= 7) return 'danger';
+  if (d <= 30) return 'warn';
+  return 'safe';
+}
+
+function expiryLabel(dateStr) {
+  const d = daysUntil(dateStr);
+  if (d === null) return '';
+  if (d < 0) return `만료 ${-d}일 지남`;
+  if (d === 0) return '오늘 만료';
+  if (d <= 30) return `D-${d}`;
+  const target = new Date(dateStr);
+  return `${target.getMonth()+1}/${target.getDate()}`;
+}
+
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  tabs.innerHTML = '';
+  
+  const allBtn = document.createElement('button');
+  allBtn.className = 'cat-tab' + (state.activeCategory === 'all' ? ' active' : '');
+  allBtn.innerHTML = `<span class="emoji">✦</span>전체`;
+  allBtn.onclick = () => {
+    state.activeCategory = 'all';
+    renderCategoryTabs();
+    renderItems();
+  };
+  tabs.appendChild(allBtn);
+  
+  state.categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab' + (state.activeCategory === cat.id ? ' active' : '');
+    btn.innerHTML = `<span class="emoji">${cat.emoji}</span>${escapeHtml(cat.label)}`;
+    btn.onclick = () => {
+      state.activeCategory = cat.id;
+      renderCategoryTabs();
+      renderItems();
+    };
+    tabs.appendChild(btn);
+  });
+  
+  const manageBtn = document.createElement('button');
+  manageBtn.className = 'cat-tab manage';
+  manageBtn.innerHTML = `⚙ 카테고리 관리`;
+  manageBtn.onclick = openCategoryManager;
+  tabs.appendChild(manageBtn);
+}
+
+function renderCategorySelect() {
+  const sel = document.getElementById('item-category');
+  const prev = sel.value;
+  sel.innerHTML = state.categories.map(c => 
+    `<option value="${c.id}">${c.emoji} ${escapeHtml(c.label)}</option>`
+  ).join('');
+  if (prev && state.categories.find(c => c.id === prev)) sel.value = prev;
+}
+
+function renderSummary() {
+  const total = state.items.reduce((s, i) => s + (i.qty || 1), 0);
+  const soon = state.items.filter(i => {
+    const s = expiryStatus(i.expiry);
+    return s === 'warn' || s === 'danger';
+  }).length;
+  const expired = state.items.filter(i => expiryStatus(i.expiry) === 'expired').length;
+  
+  document.getElementById('num-total').textContent = total;
+  document.getElementById('num-soon').textContent = soon;
+  document.getElementById('num-expired').textContent = expired;
+}
+
+function filterItems() {
+  let items = [...state.items];
+  if (state.activeCategory !== 'all') {
+    items = items.filter(i => i.category === state.activeCategory);
+  }
+  if (state.activeFilter === 'active') {
+    items = items.filter(i => expiryStatus(i.expiry) !== 'expired');
+  } else if (state.activeFilter === 'soon') {
+    items = items.filter(i => {
+      const s = expiryStatus(i.expiry);
+      return s === 'warn' || s === 'danger';
+    });
+  } else if (state.activeFilter === 'expired') {
+    items = items.filter(i => expiryStatus(i.expiry) === 'expired');
+  }
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    items = items.filter(i => 
+      (i.name || '').toLowerCase().includes(q) ||
+      (i.note || '').toLowerCase().includes(q)
+    );
+  }
+  if (state.sortBy === 'expiry') {
+    items.sort((a, b) => {
+      if (!a.expiry && !b.expiry) return 0;
+      if (!a.expiry) return 1;
+      if (!b.expiry) return -1;
+      return new Date(a.expiry) - new Date(b.expiry);
+    });
+  } else if (state.sortBy === 'name') {
+    items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+  } else if (state.sortBy === 'recent') {
+    items.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+  }
+  return items;
+}
+
+function renderItems() {
+  const container = document.getElementById('items');
+  const items = filterItems();
+  document.getElementById('count-label').textContent = items.length ? `${items.length}개의 물건` : '';
+  
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="icon">∅</div>
+        <div class="title">${state.items.length === 0 ? '아직 기록된 물건이 없어요' : '조건에 맞는 물건이 없어요'}</div>
+        <div class="hint">${state.items.length === 0 ? '오른쪽 아래 ＋ 버튼을 눌러 시작하세요' : '다른 카테고리나 검색어를 시도해보세요'}</div>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = items.map((item, idx) => {
+    const status = expiryStatus(item.expiry);
+    const cat = getCategory(item.category);
+    const expLabel = expiryLabel(item.expiry);
+    return `
+      <div class="item exp-${status}" style="animation-delay: ${idx * 0.02}s" onclick="openDetail('${item.id}')">
+        <div class="item-accent"></div>
+        <div class="item-body">
+          <div class="item-top">
+            <div class="item-name">${escapeHtml(item.name)}</div>
+            <div class="item-qty" onclick="event.stopPropagation()">
+              <button class="qty-btn" onclick="adjustQty('${item.id}', -1)">−</button>
+              <span class="qty-num">${item.qty || 1}${item.unit ? item.unit : ''}</span>
+              <button class="qty-btn" onclick="adjustQty('${item.id}', 1)">+</button>
+            </div>
+          </div>
+          <div class="item-meta">
+            <span class="item-cat">${cat.emoji} ${escapeHtml(cat.label)}</span>
+            ${expLabel ? `<span class="item-expiry">◷ ${expLabel}</span>` : ''}
+            ${item.note ? `<span>· ${escapeHtml(item.note)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function render() {
+  renderSummary();
+  renderCategoryTabs();
+  renderCategorySelect();
+  renderItems();
+}
+
+function renderRecentChips() {
+  const section = document.getElementById('recent-section');
+  const chips = document.getElementById('recent-chips');
+  const seen = new Set();
+  const recent = [...state.items]
+    .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
+    .filter(i => {
+      const key = (i.name || '').toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 12);
+  
+  if (recent.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  chips.innerHTML = recent.map(i => {
+    const cat = getCategory(i.category);
+    return `<button type="button" class="recent-chip" onclick="fillFromRecent('${i.id}')"><span class="chip-cat">${cat.emoji}</span>${escapeHtml(i.name)}</button>`;
+  }).join('');
+}
+
+function fillFromRecent(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('item-name').value = item.name || '';
+  document.getElementById('item-category').value = item.category || state.categories[0].id;
+  document.getElementById('item-unit').value = item.unit || '';
+  document.getElementById('item-qty').value = '1';
+  document.getElementById('item-expiry').value = '';
+  document.getElementById('item-purchased').value = new Date().toISOString().split('T')[0];
+  document.getElementById('item-note').value = '';
+  toast('자동 입력됨 · 유통기한 확인하세요');
+  document.getElementById('item-expiry').focus();
+}
+
+function adjustQty(id, delta) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(0, (item.qty || 1) + delta);
+  if (item.qty === 0) {
+    if (confirm(`"${item.name}"의 수량이 0이 되었습니다. 삭제할까요?`)) {
+      state.items = state.items.filter(i => i.id !== id);
+      toast('삭제되었습니다');
+    } else {
+      item.qty = 1;
+    }
+  }
+  saveItems();
+  render();
+}
+
+function openAdd() {
+  state.editingId = null;
+  document.getElementById('modal-title').textContent = '새 물건 추가';
+  document.getElementById('item-form').reset();
+  document.getElementById('item-id').value = '';
+  document.getElementById('item-qty').value = '1';
+  document.getElementById('item-purchased').value = new Date().toISOString().split('T')[0];
+  document.getElementById('delete-btn').style.display = 'none';
+  renderCategorySelect();
+  renderRecentChips();
+  showModal('modal-add');
+}
+
+function openEdit(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  state.editingId = id;
+  document.getElementById('modal-title').textContent = '물건 수정';
+  document.getElementById('item-id').value = item.id;
+  document.getElementById('item-name').value = item.name || '';
+  renderCategorySelect();
+  document.getElementById('item-category').value = item.category || state.categories[0].id;
+  document.getElementById('item-qty').value = item.qty || 1;
+  document.getElementById('item-unit').value = item.unit || '';
+  document.getElementById('item-expiry').value = item.expiry || '';
+  document.getElementById('item-purchased').value = item.purchased || '';
+  document.getElementById('item-note').value = item.note || '';
+  document.getElementById('delete-btn').style.display = 'block';
+  document.getElementById('recent-section').style.display = 'none';
+  closeModal();
+  setTimeout(() => showModal('modal-add'), 100);
+}
+
+function saveItem(e) {
+  e.preventDefault();
+  const id = document.getElementById('item-id').value || uid();
+  const data = {
+    id,
+    name: document.getElementById('item-name').value.trim(),
+    category: document.getElementById('item-category').value,
+    qty: parseInt(document.getElementById('item-qty').value) || 1,
+    unit: document.getElementById('item-unit').value.trim(),
+    expiry: document.getElementById('item-expiry').value,
+    purchased: document.getElementById('item-purchased').value,
+    note: document.getElementById('item-note').value.trim(),
+    addedAt: state.editingId ? 
+      (state.items.find(i => i.id === state.editingId)?.addedAt || Date.now()) : 
+      Date.now()
+  };
+  if (state.editingId) {
+    state.items = state.items.map(i => i.id === id ? data : i);
+    toast('수정되었습니다');
+  } else {
+    state.items.push(data);
+    toast('추가되었습니다');
+  }
+  saveItems();
+  render();
+  closeModal();
+}
+
+function deleteItem() {
+  const id = document.getElementById('item-id').value;
+  if (!id) return;
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  state.items = state.items.filter(i => i.id !== id);
+  saveItems();
+  render();
+  closeModal();
+  toast('삭제되었습니다');
+}
+
+function openDetail(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  const cat = getCategory(item.category);
+  const expLabel = expiryLabel(item.expiry);
+  const status = expiryStatus(item.expiry);
+  const statusText = {
+    safe: '여유있음', warn: '30일 이내', danger: '7일 이내',
+    expired: '만료됨', none: '기한 없음'
+  }[status];
+  
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-name">${escapeHtml(item.name)}</div>
+      <div class="detail-cat">${cat.emoji} ${escapeHtml(cat.label)}</div>
+    </div>
+    <div class="detail-info">
+      <div class="detail-row">
+        <span class="key">수량</span>
+        <span class="val">${item.qty}${item.unit || '개'}</span>
+      </div>
+      ${item.expiry ? `
+        <div class="detail-row">
+          <span class="key">유통기한</span>
+          <span class="val">${item.expiry} <em style="font-size:12px; color:var(--ink-faint);">(${expLabel})</em></span>
+        </div>
+        <div class="detail-row">
+          <span class="key">상태</span>
+          <span class="val">${statusText}</span>
+        </div>
+      ` : ''}
+      ${item.purchased ? `
+        <div class="detail-row">
+          <span class="key">구매일</span>
+          <span class="val">${item.purchased}</span>
+        </div>
+      ` : ''}
+      ${item.note ? `
+        <div class="detail-row">
+          <span class="key">메모</span>
+          <span class="val">${escapeHtml(item.note)}</span>
+        </div>
+      ` : ''}
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openEdit('${item.id}')">수정하기</button>
+    <button type="button" class="btn btn-ghost" onclick="closeModal()" style="margin-top:8px;">닫기</button>
+  `;
+  showModal('modal-detail');
+}
+
+function openCategoryManager() {
+  state.tempCategories = JSON.parse(JSON.stringify(state.categories));
+  renderCategoryManageList();
+  document.getElementById('emoji-picker-wrap').style.display = 'none';
+  showModal('modal-category');
+}
+
+function renderCategoryManageList() {
+  const list = document.getElementById('cat-manage-list');
+  const usedIds = new Set(state.items.map(i => i.category));
+  list.innerHTML = state.tempCategories.map((cat, idx) => {
+    const isUsed = usedIds.has(cat.id);
+    return `
+      <div class="cat-manage-item">
+        <button type="button" class="emoji-input" onclick="openEmojiPicker(${idx})">${cat.emoji}</button>
+        <input type="text" class="name-input" value="${escapeHtml(cat.label)}" oninput="updateCategoryName(${idx}, this.value)" maxlength="15" placeholder="카테고리 이름">
+        <button type="button" class="del-btn" onclick="removeCategory(${idx})" ${isUsed ? 'disabled' : ''}>×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateCategoryName(idx, val) {
+  if (state.tempCategories[idx]) state.tempCategories[idx].label = val;
+}
+
+function removeCategory(idx) {
+  const cat = state.tempCategories[idx];
+  const used = state.items.some(i => i.category === cat.id);
+  if (used) {
+    toast('사용 중인 카테고리는 삭제할 수 없어요');
+    return;
+  }
+  if (state.tempCategories.length <= 1) {
+    toast('최소 1개의 카테고리가 필요해요');
+    return;
+  }
+  state.tempCategories.splice(idx, 1);
+  renderCategoryManageList();
+}
+
+function addNewCategory() {
+  state.tempCategories.push({
+    id: 'cat_' + uid(),
+    emoji: '📦',
+    label: ''
+  });
+  renderCategoryManageList();
+  // Focus on the new item's name input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#cat-manage-list .name-input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+}
+
+function openEmojiPicker(idx) {
+  state.emojiTargetIdx = idx;
+  const grid = document.getElementById('emoji-grid');
+  const currentEmoji = state.tempCategories[idx].emoji;
+  grid.innerHTML = EMOJI_OPTIONS.map(e => 
+    `<button type="button" class="${e === currentEmoji ? 'selected' : ''}" onclick="selectEmoji('${e}')">${e}</button>`
+  ).join('');
+  document.getElementById('emoji-picker-wrap').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('emoji-picker-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function selectEmoji(emoji) {
+  if (state.emojiTargetIdx !== null && state.tempCategories[state.emojiTargetIdx]) {
+    state.tempCategories[state.emojiTargetIdx].emoji = emoji;
+    renderCategoryManageList();
+  }
+  document.getElementById('emoji-picker-wrap').style.display = 'none';
+  state.emojiTargetIdx = null;
+}
+
+function saveCategoriesAndClose() {
+  const invalid = state.tempCategories.some(c => !c.label || !c.label.trim());
+  if (invalid) {
+    toast('카테고리 이름을 모두 입력해주세요');
+    return;
+  }
+  state.categories = state.tempCategories.map(c => ({ ...c, label: c.label.trim() }));
+  saveCategories();
+  state.tempCategories = null;
+  if (state.activeCategory !== 'all' && !state.categories.find(c => c.id === state.activeCategory)) {
+    state.activeCategory = 'all';
+  }
+  render();
+  closeModal();
+  toast('카테고리가 저장되었습니다');
+}
+
+function cancelCategoryEdit() {
+  state.tempCategories = null;
+  closeModal();
+}
+
+function showModal(id) {
+  document.getElementById('backdrop').classList.add('show');
+  document.getElementById(id).classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+  document.getElementById('backdrop').classList.remove('show');
+  document.body.style.overflow = '';
+  document.getElementById('emoji-picker-wrap').style.display = 'none';
+}
+
+function openExport() { showModal('modal-export'); }
+
+function exportData() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    version: 2,
+    items: state.items,
+    categories: state.categories
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().split('T')[0];
+  a.href = url;
+  a.download = `pantry-backup-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('백업 파일이 다운로드되었습니다');
+}
+
+function exportCSV() {
+  const headers = ['이름', '카테고리', '수량', '단위', '유통기한', '구매일', '메모'];
+  const rows = state.items.map(i => [
+    i.name, getCategory(i.category).label, i.qty,
+    i.unit || '', i.expiry || '', i.purchased || '', i.note || ''
+  ]);
+  const csv = '\ufeff' + [headers, ...rows].map(r => 
+    r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().split('T')[0];
+  a.href = url;
+  a.download = `pantry-${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('CSV 파일이 다운로드되었습니다');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.items || !Array.isArray(data.items)) throw new Error('invalid');
+      const mode = confirm(`${data.items.length}개의 항목이 있습니다.\n\n[확인] 기존 데이터에 추가\n[취소] 기존 데이터를 대체`);
+      if (mode) {
+        state.items = [...state.items, ...data.items];
+      } else {
+        state.items = data.items;
+        if (data.categories && Array.isArray(data.categories) && data.categories.length > 0) {
+          state.categories = data.categories;
+          saveCategories();
+        }
+      }
+      saveItems();
+      render();
+      closeModal();
+      toast('가져오기가 완료되었습니다');
+    } catch (err) {
+      toast('파일을 읽을 수 없습니다');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function confirmClear() {
+  if (!confirm('정말 모든 데이터를 삭제하시겠습니까?\n\n먼저 내보내기로 백업하는 것을 권장합니다.')) return;
+  if (!confirm('마지막 확인입니다. 되돌릴 수 없습니다.')) return;
+  state.items = [];
+  saveItems();
+  render();
+  closeModal();
+  toast('모든 데이터가 삭제되었습니다');
+}
+
+function openStats() {
+  const byCat = {};
+  state.categories.forEach(c => { byCat[c.id] = 0; });
+  state.items.forEach(i => {
+    byCat[i.category] = (byCat[i.category] || 0) + (i.qty || 1);
+  });
+  const total = state.items.reduce((s, i) => s + (i.qty || 1), 0);
+  const expired = state.items.filter(i => expiryStatus(i.expiry) === 'expired').length;
+  const warn = state.items.filter(i => expiryStatus(i.expiry) === 'warn').length;
+  const danger = state.items.filter(i => expiryStatus(i.expiry) === 'danger').length;
+  const maxCount = Math.max(...Object.values(byCat), 1);
+  
+  const catBars = Object.entries(byCat)
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => {
+      const cat = getCategory(k);
+      const pct = (v / maxCount) * 100;
+      return `
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
+            <span>${cat.emoji} ${escapeHtml(cat.label)}</span>
+            <span style="font-family:'Fraunces',serif; font-size:15px;">${v}</span>
+          </div>
+          <div style="background:var(--cream-warm); height:6px; border-radius:3px; overflow:hidden;">
+            <div style="background:var(--ink); height:100%; width:${pct}%; border-radius:3px;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  
+  const recent = [...state.items].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)).slice(0, 5);
+  const recentList = recent.length ? recent.map(i => {
+    const d = new Date(i.addedAt || Date.now());
+    const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
+    const cat = getCategory(i.category);
+    return `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-soft); font-size:14px;">
+        <span>${cat.emoji} ${escapeHtml(i.name)}</span>
+        <span style="color:var(--ink-faint); font-family:'Fraunces',serif;">${dateStr}</span>
+      </div>
+    `;
+  }).join('') : '<div style="color:var(--ink-faint); text-align:center; padding:20px;">아직 기록이 없어요</div>';
+  
+  document.getElementById('stats-content').innerHTML = `
+    <div class="summary" style="padding:0 0 20px;">
+      <div class="stat"><div class="num">${total}</div><div class="label">Total</div></div>
+      <div class="stat warn"><div class="num">${warn + danger}</div><div class="label">기한 임박</div></div>
+      <div class="stat danger"><div class="num">${expired}</div><div class="label">만료됨</div></div>
+    </div>
+    <div style="font-family:'Fraunces',serif; font-style:italic; font-size:16px; margin:16px 0 12px; color:var(--ink-soft);">카테고리별 분포</div>
+    ${catBars || '<div style="color:var(--ink-faint); text-align:center; padding:20px;">데이터 없음</div>'}
+    <div style="font-family:'Fraunces',serif; font-style:italic; font-size:16px; margin:24px 0 8px; color:var(--ink-soft);">최근 추가</div>
+    ${recentList}
+    <button type="button" class="btn btn-ghost" onclick="closeModal()" style="margin-top:20px;">닫기</button>
+  `;
+  showModal('modal-stats');
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.getElementById('search').addEventListener('input', (e) => {
+  state.search = e.target.value;
+  renderItems();
+});
+
+document.querySelectorAll('.filter-switch button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-switch button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.activeFilter = btn.dataset.filter;
+    renderItems();
+  });
+});
+
+document.getElementById('sort-btn').addEventListener('click', () => {
+  const order = ['expiry', 'name', 'recent'];
+  const labels = { expiry: '유통기한순 ↓', name: '이름순 ↓', recent: '최근 추가순 ↓' };
+  const cur = order.indexOf(state.sortBy);
+  state.sortBy = order[(cur + 1) % order.length];
+  document.getElementById('sort-btn').textContent = labels[state.sortBy];
+  renderItems();
+});
+
+document.getElementById('stat-soon').addEventListener('click', () => {
+  document.querySelector('.filter-switch button[data-filter="soon"]').click();
+});
+document.getElementById('stat-expired').addEventListener('click', () => {
+  document.querySelector('.filter-switch button[data-filter="expired"]').click();
+});
+document.getElementById('stat-total').addEventListener('click', () => {
+  document.querySelector('.filter-switch button[data-filter="all"]').click();
+});
+
+loadData();
+render();
+</script>
+
+</body>
+</html>
